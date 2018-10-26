@@ -25,3 +25,6 @@ DEPENDENCIES
   jruby-jars
   saxon-xslt
   warbler!
+
+BUNDLED WITH
+   1.17.1

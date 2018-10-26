@@ -25,7 +25,7 @@
     
     <xsl:strip-space elements="*"/>
    
-    <!-- The following attribute sets are reusabe styles used throughout the stylesheet. -->
+    <!-- The following attribute sets are reusable styles used throughout the stylesheet. -->
     <!-- Headings -->
     <xsl:attribute-set name="h1">
         <xsl:attribute name="font-size">22pt</xsl:attribute>
@@ -75,7 +75,7 @@
     
     <!-- Linking attributes styles -->
     <xsl:attribute-set name="ref">
-        <xsl:attribute name="color">#14A6DC</xsl:attribute>
+        <xsl:attribute name="color">#0D6CB6</xsl:attribute>
         <xsl:attribute name="text-decoration">underline</xsl:attribute>
     </xsl:attribute-set>
     
@@ -102,7 +102,7 @@
         <xsl:attribute name="table-layout">fixed</xsl:attribute>
         <xsl:attribute name="width">100%</xsl:attribute>
         <xsl:attribute name="border">.5pt solid #ccc</xsl:attribute>
-        <xsl:attribute name="border-collapse">seperate</xsl:attribute>
+        <xsl:attribute name="border-collapse">separate</xsl:attribute>
         <xsl:attribute name="space-after">12pt</xsl:attribute>        
     </xsl:attribute-set>    
     <!-- Table headings -->
@@ -114,7 +114,7 @@
     <!-- Table cells with borders -->
     <xsl:attribute-set name="tdBorder">
         <xsl:attribute name="border">.5pt solid #ccc</xsl:attribute>
-        <xsl:attribute name="border-collapse">seperate</xsl:attribute>
+        <xsl:attribute name="border-collapse">separate</xsl:attribute>
     </xsl:attribute-set>
     
     <!--  Start main page design and layout -->
@@ -159,13 +159,13 @@
             <fo:page-sequence master-reference="toc">            
                 <!-- Page header -->                
                 <fo:static-content flow-name="xsl-region-before" margin-top=".15in">
-                    <fo:block color="gray" font-size="8pt" text-align="center">
+                    <fo:block color="dimgray" font-size="10pt" text-align="center">
                         <xsl:apply-templates select="ead:ead/ead:eadheader/ead:filedesc/ead:titlestmt" mode="pageHeader"/>
                     </fo:block>
                 </fo:static-content>
                 <!-- Page footer-->
                 <fo:static-content flow-name="xsl-region-after">
-                    <fo:block text-align="center" color="gray">
+                    <fo:block text-align="center" color="dimgray">
                         <xsl:text>- Page </xsl:text>                        
                         <fo:page-number/>
                         <xsl:text> -</xsl:text>
@@ -180,7 +180,7 @@
             <fo:page-sequence master-reference="contents">
                 <!-- Page header -->
                 <fo:static-content flow-name="xsl-region-before" margin-top=".15in">
-                    <fo:block color="gray" font-size="8pt" text-align="center">
+                    <fo:block color="dimgray" font-size="10pt" text-align="center">
                         <xsl:apply-templates select="ead:ead/ead:eadheader/ead:filedesc/ead:titlestmt" mode="pageHeader"/>
                     </fo:block>
                 </fo:static-content>
@@ -203,7 +203,7 @@
     <!-- Named template to link back to the table of contents  -->
     <xsl:template name="toc">    
         <fo:block font-size="11pt" margin-top="12pt" margin-bottom="18pt">
-            <fo:basic-link text-decoration="none" internal-destination="toc" color="#14A6DC"><fo:inline font-weight="bold">^</fo:inline> Return to Table of Contents </fo:basic-link>
+            <fo:basic-link text-decoration="none" internal-destination="toc" color="#0D6CB6"><fo:inline font-weight="bold">^</fo:inline> Return to Table of Contents </fo:basic-link>
         </fo:block>        
     </xsl:template>
     
@@ -265,10 +265,15 @@
         -->
         <xsl:apply-templates select="local:parseDate(.)"/>
     </xsl:template>
-    <!-- This template can be modified to include repository specific icons, use the template as a example.  -->
+    <!--
+        This template can be modified to include repository specific icons,
+        use the template as an example. PDF exports only support this single
+        icon template for an image in this directory specified by filename
+        i.e. src="myicon.png"
+    -->
     <xsl:template name="icon">
-        <fo:block text-align="left" margin-left="-.75in" margin-top="-.5in">
-          <fo:external-graphic src="./lib/archivesspace.small.png" content-height="75%" content-width="75%"/>
+        <fo:block background-color="#10294B" text-align="left" margin-left="-.75in" margin-top="-.5in">
+            <fo:external-graphic src="archivesspace.small.png" content-height="75%" content-width="75%"/>
         </fo:block>
     </xsl:template>
     
@@ -308,7 +313,7 @@
             <xsl:if test="ead:accessrestrict or ead:userestrict or
                 ead:custodhist or ead:accruals or ead:altformavail or ead:acqinfo or 
                 ead:processinfo or ead:appraisal or ead:originalsloc or 
-                /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt or /ead:ead/ead:eadheader/ead:revisiondesc">
+                /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt"> <!-- or /ead:ead/ead:eadheader/ead:revisiondesc -->
                 <fo:bookmark internal-destination="adminInfo">
                     <fo:bookmark-title>Administrative Information</fo:bookmark-title>
                 </fo:bookmark>
@@ -369,6 +374,13 @@
                                 </xsl:when>
                                 <xsl:otherwise>
                                     <xsl:apply-templates select="child::*/ead:unittitle"/>
+                                    <xsl:if test="(string-length(child::*/ead:unittitle[1]) &gt; 1) and (string-length(child::*/ead:unitdate[1]) &gt; 1)">, </xsl:if>
+                                    <xsl:for-each select="child::*/ead:unitdate">
+                                    <xsl:apply-templates select="."/>
+                                    <xsl:if test="position()!=last()">
+                                                    <xsl:text>, </xsl:text>
+                                    </xsl:if>
+                                    </xsl:for-each>
                                 </xsl:otherwise>
                             </xsl:choose>    
                         </fo:bookmark-title>
@@ -382,7 +394,14 @@
                                         <xsl:apply-templates select="child::*/ead:head"/>        
                                     </xsl:when>
                                     <xsl:otherwise>
-                                        <xsl:apply-templates select="child::*/ead:unittitle"/>
+                                       <xsl:apply-templates select="child::*/ead:unittitle"/>
+                                        <xsl:if test="(string-length(child::*/ead:unittitle[1]) &gt; 1) and (string-length(child::*/ead:unitdate[1]) &gt; 1)">, </xsl:if>
+                                        <xsl:for-each select="child::*/ead:unitdate">
+                                        <xsl:apply-templates select="."/>
+                                        <xsl:if test="position()!=last()">
+                                                        <xsl:text>, </xsl:text>
+                                        </xsl:if>
+                                        </xsl:for-each>
                                     </xsl:otherwise>
                                 </xsl:choose>    
                             </fo:bookmark-title>
@@ -448,7 +467,7 @@
                 <xsl:if test="ead:accessrestrict or ead:userestrict or
                               ead:custodhist or ead:accruals or ead:altformavail or ead:acqinfo or 
                               ead:processinfo or ead:appraisal or ead:originalsloc or 
-                              /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt or /ead:ead/ead:eadheader/ead:revisiondesc">
+                              /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt"> <!-- or /ead:ead/ead:eadheader/ead:revisiondesc -->
                         <fo:block text-align-last="justify"> 
                             <fo:basic-link internal-destination="adminInfo">Administrative Information</fo:basic-link>                    
                             <xsl:text>&#160;&#160;</xsl:text>                    
@@ -545,6 +564,13 @@
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <xsl:apply-templates select="child::*/ead:unittitle"/>
+                                        <xsl:if test="(string-length(child::*/ead:unittitle[1]) &gt; 1) and (string-length(child::*/ead:unitdate[1]) &gt; 1)">, </xsl:if>
+                                        <xsl:for-each select="child::*/ead:unitdate">
+                                        <xsl:apply-templates select="."/>
+                                        <xsl:if test="position()!=last()">
+                                                        <xsl:text>, </xsl:text>
+                                        </xsl:if>
+                                        </xsl:for-each>
                                     </xsl:otherwise>
                                 </xsl:choose>    
                             </fo:basic-link>                    
@@ -563,6 +589,13 @@
                                         </xsl:when>
                                         <xsl:otherwise>
                                             <xsl:apply-templates select="child::*/ead:unittitle"/>
+                                            <xsl:if test="(string-length(child::*/ead:unittitle[1]) &gt; 1) and (string-length(child::*/ead:unitdate[1]) &gt; 1)">, </xsl:if>
+                                            <xsl:for-each select="child::*/ead:unitdate">
+                                            <xsl:apply-templates select="."/>
+                                            <xsl:if test="position()!=last()">
+                                                            <xsl:text>, </xsl:text>
+                                            </xsl:if>
+                                            </xsl:for-each>
                                         </xsl:otherwise>
                                     </xsl:choose>    
                                 </fo:basic-link>                    
@@ -593,13 +626,13 @@
             <xsl:if test="ead:accessrestrict or ead:userestrict or
                 ead:custodhist or ead:accruals or ead:altformavail or ead:acqinfo or 
                 ead:processinfo or ead:appraisal or ead:originalsloc or 
-                /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt or /ead:ead/ead:eadheader/ead:revisiondesc">
+                /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt"> <!-- or /ead:ead/ead:eadheader/ead:revisiondesc -->
                 <fo:block xsl:use-attribute-sets="section">
                     <fo:block xsl:use-attribute-sets="h2" id="adminInfo">Administrative Information</fo:block>
                     <xsl:apply-templates select="ead:accessrestrict | ead:userestrict |
                         ead:custodhist | ead:accruals | ead:altformavail | ead:acqinfo |  
                         ead:processinfo | ead:appraisal | ead:originalsloc | 
-                        /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt | /ead:ead/ead:eadheader/ead:revisiondesc"/>
+                        /ead:ead/ead:eadheader/ead:filedesc/ead:publicationstmt"/> <!-- | /ead:ead/ead:eadheader/ead:revisiondesc -->
                     <xsl:call-template name="toc"/>
                 </fo:block>
             </xsl:if>
@@ -767,6 +800,7 @@
     </xsl:template>
     
     <!-- Templates for revision description  -->
+    <!-- MODIFICATION: Comment out ead:revisiondesc so that they do not end up in the PDFs
     <xsl:template match="ead:revisiondesc">
         <fo:block xsl:use-attribute-sets="section">
             <fo:block xsl:use-attribute-sets="h3ID"><xsl:value-of select="local:tagName(.)"/></fo:block>
@@ -774,6 +808,7 @@
             <xsl:if test="ead:change/ead:date">&#160;<xsl:value-of select="ead:change/ead:date"/></xsl:if>
         </fo:block>
     </xsl:template>
+    -->
     
     <!-- Formats controlled access terms -->
     <xsl:template match="ead:controlaccess">
@@ -830,16 +865,15 @@
     <xsl:template match="ead:tgroup">
         <fo:table xsl:use-attribute-sets="tableBorder">
             <xsl:apply-templates/>
-            <fo:table-body>
-                <xsl:apply-templates select="*[not(ead:colspec)]"/>    
-            </fo:table-body>
         </fo:table>
     </xsl:template>
     <xsl:template match="ead:colspec">
         <fo:table-column column-width="{@colwidth}"/>
     </xsl:template>
     <xsl:template match="ead:thead">
-        <xsl:apply-templates mode="thead"/>
+        <fo:table-header>
+            <xsl:apply-templates mode="thead"/>
+        </fo:table-header>
     </xsl:template>
     <xsl:template match="ead:tbody">
         <fo:table-body>
@@ -1090,6 +1124,7 @@
     </xsl:template>
     
    <!-- Linking elmenets -->
+   <!-- MODIFICATION: Comment out ead:ref because it breaks the stylesheet because we don't have internal targets
     <xsl:template match="ead:ref">
         <fo:basic-link internal-destination="{@target}" xsl:use-attribute-sets="ref">
             <xsl:choose>
@@ -1105,6 +1140,7 @@
             </xsl:choose>
         </fo:basic-link>
     </xsl:template>
+    -->
     <xsl:template match="ead:ptr">
         <fo:basic-link external-destination="url('{@target}')" xsl:use-attribute-sets="ref">
             <xsl:choose>
@@ -1465,7 +1501,7 @@
     <!-- Formats did containers -->
     <xsl:template match="ead:container">
         <fo:table-cell>
-            <fo:block margin="4pt 0"><xsl:value-of select="@type"/><xsl:text> </xsl:text><xsl:value-of select="."/></fo:block>
+            <fo:block margin="4pt 0"><xsl:value-of select="@label"/><xsl:text> </xsl:text><xsl:value-of select="."/></fo:block>
         </fo:table-cell>
     </xsl:template>
     
@@ -1491,7 +1527,12 @@
             -->
             <xsl:apply-templates select="ead:unittitle"/>
             <xsl:if test="(string-length(ead:unittitle[1]) &gt; 1) and (string-length(ead:unitdate[1]) &gt; 1)">, </xsl:if>
-            <xsl:apply-templates select="ead:unitdate" mode="did"/>
+            <xsl:for-each select="ead:unitdate">
+              <xsl:apply-templates select="." mode="did"/>
+              <xsl:if test="position()!=last()">
+				            <xsl:text>, </xsl:text>
+              </xsl:if>
+            </xsl:for-each>
         </fo:block>
     </xsl:template>
     
@@ -1517,7 +1558,12 @@
         <fo:block margin-bottom="0">
             <xsl:apply-templates select="ead:unittitle"/>
             <xsl:if test="(string-length(ead:unittitle[1]) &gt; 1) and (string-length(ead:unitdate[1]) &gt; 1)">, </xsl:if>
-            <xsl:apply-templates select="ead:unitdate" mode="did"/>    
+            <xsl:for-each select="ead:unitdate">
+              <xsl:apply-templates select="." mode="did"/>
+              <xsl:if test="position()!=last()">
+				            <xsl:text>, </xsl:text>
+              </xsl:if>
+            </xsl:for-each>   
         </fo:block> 
         <fo:block margin-bottom="4pt" margin-top="0">
             <xsl:apply-templates select="ead:repository" mode="dsc"/>            
@@ -1535,15 +1581,17 @@
     </xsl:template>
     <!-- Formats unitdates -->
     <xsl:template match="ead:unitdate[@type = 'bulk']" mode="did">
-        (<xsl:apply-templates/>)
+        <xsl:text>(</xsl:text>
+          <xsl:apply-templates/>
+        <xsl:text>)</xsl:text>
     </xsl:template>
     <xsl:template match="ead:unitdate" mode="did"><xsl:apply-templates/></xsl:template>
     
     <!-- Special formatting for elements in the collection inventory list -->
-    <xsl:template match="ead:repository | ead:origination | ead:unitdate | ead:unitid  
+    <xsl:template match="ead:repository | ead:origination | ead:unitid  
         | ead:physdesc | ead:physloc | ead:langmaterial | ead:materialspec | ead:container 
         | ead:abstract | ead:note" mode="dsc">
-        <xsl:if test="child::*">
+        <xsl:if test="normalize-space()">
         <fo:block xsl:use-attribute-sets="smpDsc">
             <fo:inline text-decoration="underline">
             <xsl:choose>
